@@ -40,13 +40,24 @@ def test_image_analyze_empty_returns_200():
     assert "findings" in data
     assert "riskScore" in data
 
-def test_image_analyze_preview():
+def test_image_analyze_credit():
     from fastapi.testclient import TestClient
     from src.main import app
     client = TestClient(app)
 
     with open("tests/assets/sample.png", "rb") as f:
         r = client.post("/analyze/image", files={"file": ("sample.png", f, "image/png")})
+    print("\nRESPONSE:", r.status_code, r.json()) 
+
+    assert r.status_code == 200
+
+def test_image_analyze_face():
+    from fastapi.testclient import TestClient
+    from src.main import app
+    client = TestClient(app)
+
+    with open("tests/assets/face.png", "rb") as f:
+        r = client.post("/analyze/image", files={"file": ("face.png", f, "image/png")})
     print("\nRESPONSE:", r.status_code, r.json()) 
 
     assert r.status_code == 200

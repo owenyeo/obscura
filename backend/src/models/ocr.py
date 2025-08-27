@@ -50,48 +50,27 @@ def ocr(img_bytes: bytes) -> List[Tuple[str, Tuple[float, float, float, float], 
     out: List[Tuple[str, Tuple[float, float, float, float], float]] = []
 
     # Case A: NEW pipeline — list[dict]
-    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], dict):
-        page = result[0]
-        texts  = page.get("rec_texts", []) or []
-        scores = page.get("rec_scores", []) or []
-        polys  = page.get("rec_polys", None)  # list of (4,2) arrays
-        boxes  = page.get("rec_boxes", None)  # (N,4) x1,y1,x2,y2
+    page = result[0]
+    texts  = page.get("rec_texts", []) or []
+    scores = page.get("rec_scores", []) or []
+    polys  = page.get("rec_polys", None)  # list of (4,2) arrays
+    boxes  = page.get("rec_boxes", None)  # (N,4) x1,y1,x2,y2
 
-        n = len(texts)
-        for i in range(n):
-            text = str(texts[i]) if i < len(texts) else ""
-            conf = float(scores[i]) if i < len(scores) else 0.0
+    n = len(texts)
+    for i in range(n):
+        text = str(texts[i]) if i < len(texts) else ""
+        conf = float(scores[i]) if i < len(scores) else 0.0
 
-            bbox: Optional[Tuple[float, float, float, float]] = None
-            if polys is not None and i < len(polys):
-                poly = np.array(polys[i], dtype=np.float32)  # (4,2)
-                bbox = _norm_bbox_from_poly(poly, w, h)
-            elif boxes is not None and i < len(boxes):
-                box = np.array(boxes[i], dtype=np.float32)   # (4,)
-                bbox = _norm_bbox_from_box(box, w, h)
-
-            if bbox is None:
-                continue
-
-            out.append((text.strip(), bbox, conf))
-        return out
-
-    # Case B: CLASSIC — list[list] with points and (text, score)
-    # result -> [lines] and lines is typically result[0]
-    lines = (result[0] if isinstance(result, list) and len(result) > 0 else []) or []
-    for line in lines:
-        if isinstance(line, (list, tuple)) and len(line) >= 2:
-            box_pts, text_part = line[0], line[1]
-            if isinstance(text_part, (list, tuple)) and len(text_part) >= 2:
-                text, conf = text_part[0], float(text_part[1])
-            elif isinstance(text_part, dict):
-                text = text_part.get("text", "")
-                conf = float(text_part.get("score", 0.0))
-            else:
-                continue
-
-            poly = np.array(box_pts, dtype=np.float32)  # (4,2)
+        bbox: Optional[Tuple[float, float, float, float]] = None
+        if polys is not None and i < len(polys):
+            poly = np.array(polys[i], dtype=np.float32)  # (4,2)
             bbox = _norm_bbox_from_poly(poly, w, h)
-            out.append((str(text).strip(), bbox, conf))
+        elif boxes is not None and i < len(boxes):
+            box = np.array(boxes[i], dtype=np.float32)   # (4,)
+            bbox = _norm_bbox_from_box(box, w, h)
 
+        if bbox is None:
+            continue
+
+        out.append((text.strip(), bbox, conf))
     return out
