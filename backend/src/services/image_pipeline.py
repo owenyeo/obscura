@@ -17,10 +17,10 @@ from src.schemas.analyze_image import AnalyzeImageResponse
 from src.models.ocr import ocr
 from src.models.pii_from_text import classify_ocr_text, mask_text_for_privacy
 from src.services.risk_scoring import score
+from src.services.utils_warnings import warning_for_kind
 
 MODEL_VER = {"ocr": "paddleocr-2.7", "pii_rules": "pii-regex-1.0"}
 
-# Optionally, you can pass a 'modes' string, but for this MVP we'll just do OCR->PII
 async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None) -> AnalyzeImageResponse:
     findings: List[ImageFinding] = []
     warnings: List[str] = []
@@ -47,6 +47,7 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None)
             )
         )
         kind_counts[kind] = kind_counts.get(kind, 0) + 1
+        warnings.append(warning_for_kind(kind))
 
     # 3) Risk score (weights defined in config/default.yaml)
     risk = score(kind_counts)

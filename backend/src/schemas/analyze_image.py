@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from typing import List, Tuple
 from .common import ImageFinding
 
+
 class AnalyzeImageResponse(BaseModel):
     findings: List[ImageFinding]
     riskScore: int
