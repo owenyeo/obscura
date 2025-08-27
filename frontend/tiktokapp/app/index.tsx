@@ -90,7 +90,7 @@ function UploadBox({
     >
       {imageUri ? (
         <>
-          <Image source={{ uri: imageUri }} style={styles.boxImage} />
+          <Image source={{ uri: imageUri }} style={styles.boxImage} resizeMode="contain"/>
           <View style={styles.overlay}>
             <Text style={styles.overlayText}>{busy ? "Busy…" : "Tap to change"}</Text>
           </View>
@@ -108,7 +108,8 @@ function UploadBox({
 
 const styles = StyleSheet.create({
   box: {
-    height: 280,
+    flex: 1,             // take available vertical space
+    width: "100%",
     borderRadius: 12,
     overflow: "hidden",
   },
