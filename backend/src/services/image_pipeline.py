@@ -1,4 +1,4 @@
-    # Copyright 2025 Obscura
+# Copyright 2025 Obscura
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,6 +62,7 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None)
             )
         )
         kind_counts["face"] = kind_counts.get("face", 0) + 1
+        warnings.append(warning_for_kind(kind))
 
     # 3) Risk score (weights defined in config/default.yaml)
     risk = score(kind_counts)

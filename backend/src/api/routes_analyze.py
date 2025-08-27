@@ -1,4 +1,4 @@
-    # Copyright 2025 Obscura
+# Copyright 2025 Obscura
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,14 +16,9 @@ from typing import Optional
 
 from src.schemas.analyze_text import AnalyzeTextRequest, AnalyzeTextResponse
 from src.schemas.analyze_image import AnalyzeImageResponse
-from src.services.text_pipeline import analyze_text
 from src.services.image_pipeline import analyze_image
 
 router = APIRouter()
-
-@router.post("/text", response_model=AnalyzeTextResponse)
-async def analyze_text_endpoint(payload: AnalyzeTextRequest = Body(...)):
-    return await analyze_text(payload)
 
 @router.post("/image", response_model=AnalyzeImageResponse)
 async def analyze_image_endpoint(

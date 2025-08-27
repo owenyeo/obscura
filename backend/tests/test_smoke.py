@@ -23,13 +23,6 @@ def test_healthz():
     assert r.status_code == 200
     assert r.json()["ok"] is True
 
-def test_text_analyze():
-    r = client.post("/analyze/text", json={"text": "Mail me at a@b.com or +65 9123 4567"})
-    assert r.status_code == 200
-    body = r.json()
-    assert "findings" in body
-    assert isinstance(body["riskScore"], int)
-
 def test_image_analyze_empty_returns_200():
     # a tiny blank png (won't find PII but should return 200)
     png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwAD+wGmE3+gYwAAAABJRU5ErkJggg==")
@@ -58,6 +51,17 @@ def test_image_analyze_face():
 
     with open("tests/assets/face.png", "rb") as f:
         r = client.post("/analyze/image", files={"file": ("face.png", f, "image/png")})
+    print("\nRESPONSE:", r.status_code, r.json()) 
+
+    assert r.status_code == 200
+
+def test_image_analyze_id():
+    from fastapi.testclient import TestClient
+    from src.main import app
+    client = TestClient(app)
+
+    with open("tests/assets/id.png", "rb") as f:
+        r = client.post("/analyze/image", files={"file": ("id.png", f, "image/png")})
     print("\nRESPONSE:", r.status_code, r.json()) 
 
     assert r.status_code == 200
