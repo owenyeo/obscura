@@ -1,6 +1,6 @@
 // App.tsx
 import { useState } from "react";
-import { Image, View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import { Image, View, Text, Pressable, StyleSheet, Platform, Modal } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 function getBaseUrl() {
@@ -93,6 +93,8 @@ function UploadBox({
 }) {
   const [container, setContainer] = useState({ w: 0, h: 0 });
   const [natural, setNatural] = useState({ w: 0, h: 0 }); // intrinsic img size
+  const [selected, setSelected] = useState<any | null>(null);
+
 
   return (
     <Pressable
@@ -144,38 +146,53 @@ function UploadBox({
             const width = nw * dispW;
             const height = nh * dispH;
 
+            const PADDING = 3;
+
+            const rect = {
+              left: left - PADDING,
+              top: top - PADDING,
+              width: width + PADDING * 2,
+              height: height + PADDING * 2,
+            };
             return (
-              <View
+              <Pressable
                 key={i}
-                pointerEvents="none"
+                onPress={() => setSelected(f)}   // open modal with this finding
                 style={{
                   position: "absolute",
-                  left: left - 4,          // shift left edge
-                  top: top - 4,            // shift top edge
-                  width: width + 8,        // add horizontal padding
-                  height: height + 8,      // add vertical padding
-                  // borderWidth: 2,
-                  // borderColor: "red",
-                  backgroundColor: "rgba(255, 0, 0, 0.41)", // translucent fill
-                  borderRadius: 12, // rounded corners
+                  ...rect,
+                  borderWidth: 2,
+                  borderColor: "red",
+                  backgroundColor: "rgba(255,0,0,0.2)",
+                  borderRadius: 12,
                 }}
-              >
-                <View
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: -18,
-                    backgroundColor: "rgba(255,255,255,0.85)",
-                    paddingHorizontal: 4,
-                  }}
-                >
-                  <Text style={{ fontSize: 10, color: "#c00" }}>
-                    {f.kind}
-                  </Text>
-                </View>
-              </View>
+              />
             );
           })}
+
+          {/* Modal to show details */}
+          <Modal
+            visible={!!selected}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setSelected(null)}
+          >
+            <Pressable
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => setSelected(null)}  // dismiss when backdrop pressed
+            >
+              <View style={{ backgroundColor: "white", padding: 20, borderRadius: 12 }}>
+                <Text style={{ fontWeight: "700" }}>{selected?.kind}</Text>
+                <Text>{selected?.text}</Text>
+                <Text>Confidence: {selected?.conf?.toFixed?.(2)}</Text>
+              </View>
+            </Pressable>
+          </Modal>
 
           <View style={styles.overlay}>
             <Text style={styles.overlayText}>
