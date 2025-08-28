@@ -11,7 +11,7 @@ export default function App() {
   const [img, setImg] = useState<{ uri: string; type?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null); // <-- add this
+  const [result, setResult] = useState<any>(null);
 
   async function pick() {
     setErr(null);
@@ -150,19 +150,21 @@ function UploadBox({
                 pointerEvents="none"
                 style={{
                   position: "absolute",
-                  left,
-                  top,
-                  width,
-                  height,
-                  borderWidth: 2,
-                  borderColor: "red",
+                  left: left - 4,          // shift left edge
+                  top: top - 4,            // shift top edge
+                  width: width + 8,        // add horizontal padding
+                  height: height + 8,      // add vertical padding
+                  // borderWidth: 2,
+                  // borderColor: "red",
+                  backgroundColor: "rgba(255, 0, 0, 0.41)", // translucent fill
+                  borderRadius: 12, // rounded corners
                 }}
               >
                 <View
                   style={{
                     position: "absolute",
                     left: 0,
-                    top: -16,
+                    top: -18,
                     backgroundColor: "rgba(255,255,255,0.85)",
                     paddingHorizontal: 4,
                   }}
