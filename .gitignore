@@ -1,1 +1,59 @@
-backend/.venv
+# -------------------------
+# FRONTEND (Expo / RN / Lynx)
+# -------------------------
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.android/
+.ios/
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Debug / Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Local env
+.env*.local
+
+# -------------------------
+# BACKEND (Python / FastAPI)
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.pkl
+*.egg-info/
+.venv/
+.env
+.mypy_cache/
+.pytest_cache/
+coverage/
+htmlcov/
+
+# -------------------------
+# GENERAL
+# -------------------------
+.DS_Store
+*.pem
+.idea/
+.vscode/
