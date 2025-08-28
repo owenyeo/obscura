@@ -1,4 +1,4 @@
-# Copyright 2025 Obscura
+    # Copyright 2025 Obscura
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,17 @@ from src.core.logging import configure_logging
 
 app = FastAPI(title="Obscura API", version="0.1.0")
 configure_logging()
+
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request
+import logging
+logger = logging.getLogger("uvicorn.error")
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error("422 detail: %s", exc.errors())
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
 app.add_middleware(
     CORSMiddleware,

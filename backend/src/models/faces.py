@@ -25,11 +25,6 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 # load model
 model = YOLO(model_path)
 
-image_path = "tests/assets/face.png"
-
-output = model(Image.open(image_path))
-print(output[0].boxes)
-results = Detections.from_ultralytics(output[0])
 def _pil_from_bytes(img_bytes: bytes) -> Image.Image:
     return Image.open(io.BytesIO(img_bytes)).convert("RGB")
 

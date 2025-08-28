@@ -2,6 +2,10 @@
 import { useState } from "react";
 import { Image, View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Platform } from "react-native";
+import * as FileSystem from "expo-file-system"; // native only
+
+const API = "http://localhost:8080/analyze/image";
 
 export default function App() {
   const [img, setImg] = useState<{ uri: string; type?: string } | null>(null);
@@ -23,26 +27,35 @@ export default function App() {
     }
   }
 
-  async function upload() {
+  
+  async function upload(img: { uri: string; type?: string }) {
     if (!img) return;
-    setBusy(true); setErr(null);
-    try {
+
+    if (Platform.OS === "web") {
+      // WEB: turn the picked URI into a Blob, then send FormData
+      const resp = await fetch(img.uri);
+      const blob = await resp.blob();
+
       const fd = new FormData();
-      fd.append("file", {
-        // @ts-ignore React Native FormData file
-        uri: img.uri,
-        name: "photo.jpg",
-        type: img.type || "image/jpeg",
+      fd.append("file", blob, "photo.jpg");     // proper file field
+      // fd.append("modes", "ocr,face");        // optional extra fields
+
+      const r = await fetch(API, { method: "POST", body: fd }); // don't set Content-Type
+      if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+      return r.json();
+    } else {
+      // NATIVE (iOS/Android): use FileSystem helper or FormData {uri,name,type}
+      // A) Robust streaming upload:
+      const res = await FileSystem.uploadAsync(API, img.uri, {
+        httpMethod: "POST",
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        fieldName: "file",
+        mimeType: img.type || "image/jpeg",
+        // parameters: { modes: "ocr,face" },   // optional
       });
-      const r = await fetch("https://your-api.example.com/upload", {
-        method: "POST",
-        body: fd,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
-    } catch (e: any) {
-      setErr(String(e.message || e));
-    } finally { setBusy(false); }
+      if (res.status !== 200) throw new Error(`${res.status} ${res.body}`);
+      return JSON.parse(res.body);
+    }
   }
 
   return (
