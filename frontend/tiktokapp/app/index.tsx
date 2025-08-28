@@ -1,12 +1,20 @@
 // App.tsx
 import { useState } from "react";
-import { Image, View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
+import { Image, View, Text, Pressable, ActivityIndicator, StyleSheet, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+
+// platform-aware base URL
+function getBaseUrl() {
+  // iOS simulator can use localhost; Android emulator needs 10.0.2.2
+  if (Platform.OS === "android") return "http://10.0.2.2:8080";
+  return "http://localhost:8080";
+}
 
 export default function App() {
   const [img, setImg] = useState<{ uri: string; type?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
 
   async function pick() {
     setErr(null);
@@ -34,12 +42,16 @@ export default function App() {
         name: "photo.jpg",
         type: img.type || "image/jpeg",
       });
-      const r = await fetch("https://your-api.example.com/upload", {
+      const r = await fetch(`${getBaseUrl()}/analyze/image`, {
         method: "POST",
         body: fd,
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
+
+      const json = await r.json();
+      console.log(json);
+      setResult(json);  
     } catch (e: any) {
       setErr(String(e.message || e));
     } finally { setBusy(false); }
@@ -63,6 +75,16 @@ export default function App() {
           <Text style={styles.uploadBtnText}>{busy ? "Uploading…" : "Upload"}</Text>
         </Pressable>
       )}
+
+      {result && (
+        <View style={{ maxWidth: 360 }}>
+          <Text style={{ fontWeight: "700", marginTop: 8 }}>
+            Risk score: {result.riskScore?.toFixed?.(2) ?? "—"}
+          </Text>
+          <Text selectable>{JSON.stringify(result.findings ?? result, null, 2)}</Text>
+        </View>
+      )}
+
 
       {err && <Text style={{ color: "red" }}>{err}</Text>}
     </View>
