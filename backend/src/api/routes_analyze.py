@@ -29,4 +29,4 @@ async def analyze_image_endpoint(
     if file.content_type not in {"image/jpeg", "image/png", "image/webp"}:
         raise HTTPException(status_code=400, detail="Unsupported image type")
     content = await file.read()
-    return await analyze_image(content, modes=modes, policy=policy)
+    return await analyze_image(content, modes=modes, policy=policy, filename=file.filename)
