@@ -161,38 +161,49 @@ function UploadBox({
                 style={{
                   position: "absolute",
                   ...rect,
-                  borderWidth: 2,
-                  borderColor: "red",
-                  backgroundColor: "rgba(255,0,0,0.2)",
+                  // borderWidth: 2,
+                  // borderColor: "red",
+                  backgroundColor: "rgba(255, 0, 0, 0.35)",
                   borderRadius: 12,
                 }}
               />
             );
           })}
 
-          {/* Modal to show details */}
           <Modal
             visible={!!selected}
             transparent
             animationType="fade"
             onRequestClose={() => setSelected(null)}
           >
-            <Pressable
-              style={{
-                flex: 1,
-                backgroundColor: "rgba(0,0,0,0.5)",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onPress={() => setSelected(null)}  // dismiss when backdrop pressed
-            >
-              <View style={{ backgroundColor: "white", padding: 20, borderRadius: 12 }}>
-                <Text style={{ fontWeight: "700" }}>{selected?.kind}</Text>
-                <Text>{selected?.text}</Text>
-                <Text>Confidence: {selected?.conf?.toFixed?.(2)}</Text>
-              </View>
+            {/* Backdrop fills screen, centers sheet, adds padding */}
+            <Pressable style={styles.backdrop} onPress={() => setSelected(null)}>
+              {/* Prevent closing when pressing on the sheet itself */}
+              <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+                <Text style={{ fontSize: 16, marginBottom: 8 }}>
+                  Do you want to censor <Text style={{ fontWeight: "700" }}>{selected?.kind}</Text>?
+                </Text>
+
+                <Text style={{ marginBottom: 20, color: "#333" }}>{selected?.text}</Text>
+
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => setSelected(null)}>
+                    <Text style={styles.btnGhostText}>No</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.btn, styles.btnPrimary]}
+                    onPress={() => {
+                      console.log("Censor:", selected);
+                      setSelected(null);
+                    }}
+                  >
+                    <Text style={styles.btnPrimaryText}>Yes</Text>
+                  </Pressable>
+                </View>
+              </Pressable>
             </Pressable>
           </Modal>
+
 
           <View style={styles.overlay}>
             <Text style={styles.overlayText}>
@@ -231,4 +242,28 @@ const styles = StyleSheet.create({
   overlayText: { color: "#fff", fontWeight: "600" },
   uploadBtn: { backgroundColor: "#111", paddingVertical: 12, borderRadius: 10, alignItems: "center" },
   uploadBtnText: { color: "#fff", fontWeight: "600" },
+    backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,               // <-- padding on all sides
+  },
+  sheet: {
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: 12,
+    backgroundColor: "white",
+    padding: 20,
+  },
+  btn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  btnGhost: { backgroundColor: "#e5e7eb" },
+  btnGhostText: { color: "#111", fontWeight: "600" },
+  btnPrimary: { backgroundColor: "#ef4444" },
+  btnPrimaryText: { color: "white", fontWeight: "600" },
 });
