@@ -16,6 +16,7 @@ from src.schemas.common import ImageFinding
 from src.schemas.analyze_image import AnalyzeImageResponse
 from src.models.ocr import ocr
 from src.models.faces import faces
+from src.models.landmarks import landmarks
 from src.models.pii_from_text import classify_ocr_text, mask_text_for_privacy
 from src.services.risk_scoring import score
 from src.services.utils_warnings import warning_for_kind
@@ -63,8 +64,23 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None)
         )
         kind_counts["face"] = kind_counts.get("face", 0) + 1
         warnings.append(warning_for_kind(kind))
+    
+    # 3) Landmarks detection
+    for (cls_name, x, y, w, h, conf) in landmarks(img_bytes, conf_th=0.25):
+        findings.append(
+            ImageFinding(
+                kind=cls_name,             
+                bbox=(x, y, w, h),
+                conf=conf,
+                source="yolov8-landmarks",
+                ver="YOLOv8-landmarks-0.1",
+                text=None,
+            )
+        )
+        kind_counts[cls_name] = kind_counts.get(cls_name, 0) + 1
+        warnings.append(warning_for_kind(cls_name))
 
-    # 3) Risk score (weights defined in config/default.yaml)
+    # 4) Risk score (weights defined in config/default.yaml)
     risk = score(kind_counts)
 
     return AnalyzeImageResponse(
