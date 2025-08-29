@@ -16,6 +16,7 @@ FastAPI service for detecting privacy risks in text/images and returning **findi
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+pip install git+https://github.com/facebookresearch/segment-anything.git
 ./run.sh
 # open http://localhost:8080/healthz
 ```
@@ -26,6 +27,10 @@ pip install -r requirements.txt
 docker build -t privacy-shadows-api ./backend
 docker run -p 8080:8080 -w /app -v $(pwd)/backend:/app privacy-shadows-api
 ```
+### Weights
+
+- Download segment-anything weight and rename to `sam_vit_h.pth` [here](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
+- Add the file into `src/models/weights`
 
 ### Endpoints
 

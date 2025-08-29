@@ -81,10 +81,10 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None)
     # 4) Risk score (weights defined in config/default.yaml)
     risk = score(kind_counts)
 
-    # 4) SAM Segmentation for high-confidence detections (not “risk”)
+    # 5) SAM Segmentation for high-confidence detections (not “risk”)
     masks = []
     for finding in findings:
-        if finding.conf >= 0.90:  # detection confidence threshold
+        if finding.conf >= 0.70:  # detection confidence threshold
             x, y, w, h = finding.bbox  # normalized xywh
             # convert to pixel xyxy, clamp to image bounds
             x1 = max(0, min(W - 1, int(round(x * W))))

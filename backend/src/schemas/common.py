@@ -30,6 +30,18 @@ KindImage = Literal[
     "passport",
     "iban",
     "bic",
+    # Landmarkers
+    "person",
+    "rider",
+    "car",
+    "truck", 
+    "bus",
+    "train",
+    "motorcycle", 
+    "bicycle", 
+    "traffic_light", 
+    "traffic_sign", 
+    "building",
 ]
 
 class TextFinding(BaseModel):

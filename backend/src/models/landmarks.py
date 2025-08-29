@@ -7,7 +7,7 @@ from PIL import Image
 
 CLASSES = [
     "person", "rider", "car", "truck", "bus", "train",
-    "motorcycle", "bicycle", "traffic light", "traffic sign", "building"
+    "motorcycle", "bicycle", "traffic_light", "traffic_sign", "building"
 ]
 
 # load once at import time
