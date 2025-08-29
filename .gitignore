@@ -1,1 +1,17 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# FastAPI / Uvicorn reload artifacts
+*.log
+
+# Virtual environments
+.venv/
+.env/
 backend/.venv
+
+# Pytest / coverage
+.coverage
+htmlcov/
+.pytest_cache/

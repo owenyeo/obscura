@@ -19,7 +19,7 @@ from PIL import Image, ImageFile
 from typing import List, Tuple
 
 # download model
-model_path = "src\models\weights\yolov8n_100e.pt"
+model_path = "src/models/weights/yolov8n_100e.pt"
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # load model
