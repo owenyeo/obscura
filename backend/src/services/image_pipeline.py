@@ -130,10 +130,12 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None,
         mask_pil = mask_pil.resize(pil_img.size, Image.NEAREST)   # force same W,H
         # pick the largest side your GPU can handle
         # SD 1.5 often works up to 1024–1536; SD 2.0 likes 768 multiples; SDXL likes 1024.
-        IMG_MAX_SIDE = 1024   # try 1024; raise/lower based on VRAM
+        IMG_MAX_SIDE = 512   # try 1024; raise/lower based on VRAM
         img_sq, mask_sq, meta = fit_to_canvas_keep_ar(
             pil_img, mask_pil, max_side=IMG_MAX_SIDE, mult=64
         )
+        mask_vis = mask_sq.copy()
+        # mask_vis.save(f"{path}/{filename}_mask_sq_debug.png")  # white areas will be replaced
         inpainted_sq = inpaint_image(
             image=img_sq,
             mask=mask_sq,
