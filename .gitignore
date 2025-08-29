@@ -15,3 +15,6 @@ backend/.venv
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Image test outputs
+backend/tests/outputs/
