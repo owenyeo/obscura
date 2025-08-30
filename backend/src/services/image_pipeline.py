@@ -63,22 +63,22 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None)
             )
         )
         kind_counts["face"] = kind_counts.get("face", 0) + 1
-        warnings.append(warning_for_kind(kind))
+        warnings.append(warning_for_kind("face"))
     
-    # 3) Landmarks detection
-    for (cls_name, x, y, w, h, conf) in landmarks(img_bytes, conf_th=0.25):
-        findings.append(
-            ImageFinding(
-                kind=cls_name,             
-                bbox=(x, y, w, h),
-                conf=conf,
-                source="yolov8-landmarks",
-                ver="YOLOv8-landmarks-0.1",
-                text=None,
-            )
-        )
-        kind_counts[cls_name] = kind_counts.get(cls_name, 0) + 1
-        warnings.append(warning_for_kind(cls_name))
+    # # 3) Landmarks detection
+    # for (cls_name, x, y, w, h, conf) in landmarks(img_bytes, conf_th=0.25):
+    #     findings.append(
+    #         ImageFinding(
+    #             kind=cls_name,             
+    #             bbox=(x, y, w, h),
+    #             conf=conf,
+    #             source="yolov8-landmarks",
+    #             ver="YOLOv8-landmarks-0.1",
+    #             text=None,
+    #         )
+    #     )
+    #     kind_counts[cls_name] = kind_counts.get(cls_name, 0) + 1
+    #     warnings.append(warning_for_kind(cls_name))
 
     # 4) Risk score (weights defined in config/default.yaml)
     risk = score(kind_counts)

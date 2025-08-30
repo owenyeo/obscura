@@ -16,11 +16,13 @@ from typing import Literal, Tuple, Optional
 
 KindText = Literal["email", "phone", "national_id", "address_text"]
 KindImage = Literal[
+    # biometric / ID
     "face",
     "license_plate",
     "document_id",
     "address_sign",
-    # PII via OCR:
+
+    # PII via OCR
     "email",
     "phone",
     "credit_card",
@@ -30,8 +32,20 @@ KindImage = Literal[
     "passport",
     "iban",
     "bic",
-]
 
+    # scene / object categories
+    "person",
+    "rider",
+    "car",
+    "truck",
+    "bus",
+    "train",
+    "motorcycle",
+    "bicycle",
+    "traffic light",
+    "traffic sign",
+    "building",
+]
 class TextFinding(BaseModel):
     kind: KindText
     span: Tuple[int, int] = Field(..., description="UTF-16 indices")

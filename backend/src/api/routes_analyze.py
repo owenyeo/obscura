@@ -17,6 +17,7 @@ from typing import Optional
 from src.schemas.analyze_text import AnalyzeTextRequest, AnalyzeTextResponse
 from src.schemas.analyze_image import AnalyzeImageResponse
 from src.services.image_pipeline import analyze_image
+from src.services.video_pipeline import analyze_video
 
 router = APIRouter()
 
@@ -30,3 +31,14 @@ async def analyze_image_endpoint(
         raise HTTPException(status_code=400, detail="Unsupported image type")
     content = await file.read()
     return await analyze_image(content, modes=modes, policy=policy)
+
+@router.post("/video", response_model=AnalyzeImageResponse)
+async def analyze_video_endpoint(
+    file: UploadFile = File(...),
+    modes: Optional[str] = Form(None),
+    policy: Optional[str] = Form(None),
+):
+    if file.content_type not in {"video/mp4", "video/quicktime"}:
+        raise HTTPException(status_code=400, detail="Unsupported image type")
+    content = await file.read()
+    return await analyze_video(content, modes=modes, policy=policy)

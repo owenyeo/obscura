@@ -65,3 +65,14 @@ def test_image_analyze_id():
     print("\nRESPONSE:", r.status_code, r.json()) 
 
     assert r.status_code == 200
+
+def test_video_analyze():
+    from fastapi.testclient import TestClient
+    from src.main import app
+    client = TestClient(app)
+
+    with open("tests/assets/test.mp4", "rb") as f:
+        r = client.post("/analyze/video", files={"file": ("test.mp4", f, "video/mp4")})
+    print("\nRESPONSE:", r.status_code, r.json()) 
+
+    assert r.status_code == 200
