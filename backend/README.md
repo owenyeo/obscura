@@ -18,6 +18,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pip install git+https://github.com/facebookresearch/segment-anything.git
 pip install diffusers transformers accelerate safetensors
+pip install simple-lama-inpainting
 ./run.sh
 # open http://localhost:8080/healthz
 ```

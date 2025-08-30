@@ -1,5 +1,6 @@
 from typing import List, Dict
 import io
+import os
 from PIL import Image  # for W,H (and optionally to pass pixel data to SAM)
 import numpy as np
 import cv2 
@@ -12,7 +13,8 @@ from src.models.pii_from_text import classify_ocr_text, mask_text_for_privacy
 from src.services.risk_scoring import score
 from src.services.utils_warnings import warning_for_kind
 from src.models.masking import segment_within_bbox, visualize_mask  # SAM segmentation logic
-from src.models.inpaint import inpaint_image, fit_to_canvas_keep_ar, unpad_and_restore
+# from src.models.inpaint import inpaint_image, fit_to_canvas_keep_ar, unpad_and_restore
+from src.models.lama import inpaint
 
 MODEL_VER = {"ocr": "paddleocr-2.7", "pii_rules": "pii-regex-1.0", "face": "YOLOv8"}
 
@@ -85,7 +87,7 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None,
     # 5) SAM Segmentation for high-confidence detections (not “risk”)
     masks = []
     for finding in findings:
-        if finding.conf >= 0.70:  # detection confidence threshold
+        if finding.conf >= 0.85:  # detection confidence threshold
             x, y, w, h = finding.bbox  # normalized xywh
             # convert to pixel xyxy, clamp to image bounds
             x1 = max(0, min(W - 1, int(round(x * W))))
@@ -117,37 +119,26 @@ async def analyze_image(img_bytes: bytes, modes: str | None, policy: str | None,
             cv2.LINE_AA,
         )
     if masks:
-        ext=".jpg"
+        fname,ext = os.path.splitext(filename)
         path="./tests/output"
         combined_mask = masks[0].copy()
         for m in masks[1:]:
             combined_mask |= m
         overlay = visualize_mask(overlay, combined_mask, alpha=0.5)
-        Image.fromarray(overlay).save(f"{path}/{filename}_masks{ext}")
-
-        # 6) Inpainting with Stable Diffusion
+        Image.fromarray(overlay).save(f"{path}/{fname}_masks{ext}")
+        
+        # 6) Inpainting with laMa 
         mask_pil = Image.fromarray((combined_mask.astype(np.uint8) * 255)).convert("L")
-        mask_pil = mask_pil.resize(pil_img.size, Image.NEAREST)   # force same W,H
-        # pick the largest side your GPU can handle
-        # SD 1.5 often works up to 1024–1536; SD 2.0 likes 768 multiples; SDXL likes 1024.
-        IMG_MAX_SIDE = 512   # try 1024; raise/lower based on VRAM
-        img_sq, mask_sq, meta = fit_to_canvas_keep_ar(
-            pil_img, mask_pil, max_side=IMG_MAX_SIDE, mult=64
-        )
-        mask_vis = mask_sq.copy()
-        # mask_vis.save(f"{path}/{filename}_mask_sq_debug.png")  # white areas will be replaced
-        inpainted_sq = inpaint_image(
-            image=img_sq,
-            mask=mask_sq,
-            prompt="neutral waall and foliage, seamless background, no text",
-            negative_prompt="text, logo, brand, signage, skyline, vehicles",
-            steps=30,
-            guidance=6.0,
-            seed=42,
-        )
-        inpainted = unpad_and_restore(inpainted_sq, meta)
-        inpainted.save(f"{path}/{filename}_inpainted{ext}")
-    
+        mask_pil = mask_pil.resize(pil_img.size, Image.NEAREST)
+        mask_pil = mask_pil.point(lambda p: 255 if p > 127 else 0, mode="L")
+        
+        img_path  = f"{path}/{fname}_src{ext}"       # use PNG to avoid JPEG artifacts
+        mask_path = f"{path}/{fname}_mask{ext}"
+        save_path = f"{path}/{fname}_inpainted{ext}"
+        
+        pil_img.save(img_path)
+        mask_pil.save(mask_path)
+        inpaint(img_path, mask_path, save_path)
 
     return AnalyzeImageResponse(
         findings=findings,
