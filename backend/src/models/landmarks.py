@@ -6,12 +6,11 @@ from io import BytesIO
 from PIL import Image
 
 CLASSES = [
-    "person", "rider", "car", "truck", "bus", "train",
-    "motorcycle", "bicycle", "traffic light", "traffic sign", "building"
+    "face", "license_plate", "traffic_sign"
 ]
 
 # load once at import time
-_model = YOLO("src/models/weights/yolov8n_landmarks.pt")
+_model = YOLO("src/models/weights/pii_detector.pt")
 
 def landmarks(img_bytes: bytes, conf_th: float = 0.25):
     """

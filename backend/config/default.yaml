@@ -35,17 +35,7 @@
     face: 15
     email: 10
     phone: 10
-    credit_card: 40
+    credit_card: 40              
+    traffic_sign: 8   
+    license_plate: 8
 
-    # landmarks / scene elements
-    person: 5           
-    rider: 3
-    car: 8              
-    truck: 10          
-    bus: 12            
-    train: 12           
-    motorcycle: 6
-    bicycle: 4
-    traffic light: 3    
-    traffic sign: 8     
-    building: 15        
