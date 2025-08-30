@@ -1,7 +1,7 @@
 // App.tsx
 import { useState } from "react";
 import {
-  Image,
+  Image as RNImage,
   View,
   Text,
   Pressable,
@@ -47,6 +47,15 @@ export default function App() {
     }
   }
 
+  function extFromMime(m?: string) {
+    if (!m) return "bin";
+    if (m.includes("jpeg") || m.includes("jpg")) return "jpg";
+    if (m.includes("png")) return "png";
+    if (m.includes("webp")) return "webp";
+    if (m.includes("heic")) return "heic";
+    return "bin";
+  }
+
   async function upload() {
     if (!img) return;
     setBusy(true);
@@ -54,25 +63,34 @@ export default function App() {
     setScreen("loading"); // show loading page immediately
 
     try {
+      const url = `${getBaseUrl()}/analyze/image`;
       const fd = new FormData();
-      fd.append("file", {
-        // @ts-ignore RN FormData file type
-        uri: img.uri,
-        name: "photo.jpg",
-        type: img.type || "image/jpeg",
-      });
-      const r = await fetch(`${getBaseUrl()}/analyze/image`, {
-        method: "POST",
-        body: fd,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
-      const json = await r.json();
-      setResult(json);
-      setScreen("result"); // show results-only page (no buttons)
+
+      if (Platform.OS === "web") {
+        // Web: convert blob: URI to Blob/File
+        const resp = await fetch(img.uri);
+        const blob = await resp.blob();
+        const mime = blob.type || img.type || "image/jpeg";
+        const name = `upload.${extFromMime(mime)}`;
+        fd.append("file", new File([blob], name, { type: mime }));
+      } else {
+        // Native: RN file object
+        const mime = img.type || "image/jpeg";
+        const name = `upload.${extFromMime(mime)}`;
+        // @ts-ignore
+        fd.append("file", { uri: img.uri, name, type: mime });
+      }
+
+      const r = await fetch(url, { method: "POST", body: fd });
+
+      const text = await r.text();
+      if (!r.ok) throw new Error(`HTTP ${r.status}: ${text}`);
+
+      setResult(JSON.parse(text));
+      setScreen("result");
     } catch (e: any) {
       setErr(String(e.message || e));
-      setScreen("idle"); // return to idle to let user retry
+      setScreen("idle");
     } finally {
       setBusy(false);
     }
@@ -160,16 +178,29 @@ function UploadBox({ imageUri, result, onPress, busy, readOnly = false, showChan
       }}
       collapsable={false}  // <- helps absolute overlays stay hittable
     >
-      <Image
+      <RNImage
         source={{ uri: imageUri }}
         style={styles.boxImage}
         resizeMode="contain"
-        pointerEvents="none"     // <- critical: image won’t block taps
+        pointerEvents="none"
         onLoad={(e) => {
-          const { width, height } = (e.nativeEvent as any).source;
-          setNatural((prev) => ({ w: width || prev.w, h: height || prev.h }));
+          const src = (e?.nativeEvent as any)?.source; // iOS/Android provide this, web may not
+          if (src?.width && src?.height) {
+            setNatural((prev) => ({ w: src.width || prev.w, h: src.height || prev.h }));
+            return;
+          }
+          // Fallback: ask RN for the intrinsic size (works on native & web)
+          RNImage.getSize(
+            imageUri,
+            (w, h) => setNatural({ w, h }),
+            () => {
+              // optional: keep previous if getSize fails
+              // setNatural(prev => prev)
+            }
+          );
         }}
       />
+
 
       {/* Overlays */}
       {result?.findings?.map((f: any, i: number) => {

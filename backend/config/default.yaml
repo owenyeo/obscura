@@ -29,23 +29,23 @@
       phone: 0.95
 
     weights:
-    national_id: 50
-    license_plate: 30
-    address_text: 20
-    face: 15
-    email: 10
-    phone: 10
-    credit_card: 40
+      national_id: 50
+      license_plate: 30
+      address_text: 20
+      face: 15
+      email: 10
+      phone: 10
+      credit_card: 40
 
-    # landmarks / scene elements
-    person: 5           
-    rider: 3
-    car: 8              
-    truck: 10          
-    bus: 12            
-    train: 12           
-    motorcycle: 6
-    bicycle: 4
-    traffic light: 3    
-    traffic sign: 8     
-    building: 15        
+      # landmarks / scene elements
+      person: 5           
+      rider: 3
+      car: 8              
+      truck: 10          
+      bus: 12            
+      train: 12           
+      motorcycle: 6
+      bicycle: 4
+      traffic light: 3    
+      traffic sign: 8     
+      building: 15        
